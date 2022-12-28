@@ -796,10 +796,12 @@ int recherche_TOF(TOF *F,int cle_recherche, int *bloc, int *deplacement)
 
 }
 //***********************************************************************
-void insertion_eleve(TOVC *f,TOF *index, char *nom,char *prenom,int annee,int classe,char genre,int nb_bloc_index)
+void insertion_eleve(char *fichetudiant,TOF *index, char *nom,char *prenom,int annee,int classe,char genre)
 {
 
   srand(time(NULL));
+  TOVC *f;
+  f=ouvrir(fichetudiant,'a');
   char ann[6]= {"P12345"};
   char inter[100];
   char ident[4];
@@ -856,103 +858,71 @@ void insertion_eleve(TOVC *f,TOF *index, char *nom,char *prenom,int annee,int cl
     }
     if((annee<5)||(classe<4)){insertion(f,eleve,bloc,depl,buf.tab[j].bloc,buf.tab[j].deplacement);}
     else{insertion(f,eleve,bloc,depl,10000000000,100000000);}
-    aff_enteteTOF(index,1,nb_bloc_index);
-
-  /*  while(i<=nb_bloc_index)
+    fermer(f);
+    while(i<=enteteTOF(index,1))
     {
         while(j<=buf.nb)
         {
-            printf("\n++i=%d ------j=%d +++++++ i avant= %d +++++++++++j avant=%d  *********",i,j,buf.tab[j].bloc,buf.tab[j].deplacement);
-            buf.tab[j].bloc = ((buf.tab[j].bloc)*Max_tab + longg + (buf.tab[j].deplacement)) / Max_tab;
-            buf.tab[j].deplacement = ((buf.tab[j].deplacement) + longg ) % Max_tab ;
-            printf(" i apres= %d +++++++++++j apres=%d  *********\n",buf.tab[j].bloc,buf.tab[j].deplacement);
-            j++;
-        }
-        ecriredirTOF(index,i,buf);
-        i++;
-        j=0;
-        if(i<=nb_bloc_index){liredir(index,i,&buf);}
-    }*/
-   // printf("\n-----nb_bloc=%d -----\n",enteteTOF(index,1));
-  /*  while(i<=nb_bloc_index)
-    {
-        while(j<=buf.nb)
-        {
-            printf("\n++i=%d ------j=%d +++++++ i avant= %d +++++++++++j avant=%d  *********",i,j,buf.tab[j].bloc,buf.tab[j].deplacement);
             buf.tab[j].deplacement = (buf.tab[j].deplacement) + longg;
             if((buf.tab[j].deplacement)>=Tail_bloc)
             {
                 buf.tab[j].deplacement= (buf.tab[j].deplacement)-Tail_bloc;
                 buf.tab[j].bloc=(buf.tab[j].bloc)+1;
             }
-            printf(" i apres= %d +++++++++++j apres=%d  *********\n",buf.tab[j].bloc,buf.tab[j].deplacement);
             j++;
         }
-       // ecriredirTOF(index,i,buf);
-        //i++;
-        j=0;
-        //if(i<=nb_bloc_index-1){liredir(index,i+1,&buf);}
+        ecriredirTOF(index,i,buf);
         i++;
-        printf("\n+-+-+-+-+-+-+-+-+-+-%d",i);
-
-    }*/
-
+        j=0;
+        if(i<=enteteTOF(index,1)){ liredirTOF(index,i,&buf);}
+    }
 
 }
-
 
 
 
 int main()
 {
     srand(time(NULL));
-    char chaine1[50] = {"3006502P1fRAHMOUNE,Meryem14524"};
+   /* char chaine1[50] = {"3006502P1fRAHMOUNE,Meryem14524"};
     char chaine2[50] = {"2600491P1fREZIG,Basma38652"};
     char chaine3[50] = {"3001479P1fBENYAMINA,Donya##195"};
     char chaine4[50] = {"3004466P1fBOUCHAREB,Dalia96636"};
     char chaine5[50] = {"3008717P1fBOUCHAREB,Leila82##5"};
     char chaine6[50] = {"2801539P1fBERKANI,Sofia75878"};
-    char chaine7[50] = {"28"};
+    char chaine7[50] = {"28"};*/
 
     char cle1[50];
     char cle2[50];
     int longeur,supp;
     TOVC *F;
     TOF *index;
-    int i,j;
+    int i,j,longg;
   F = ouvrir("FICHIERETUDIANTS",'a');
   index=ouvrirTOF("INDEXCLASSE",'a');
   int b,a=1;
   Buffer1 buff;
 
- // printf("%d\n",enteteTOF(index,1));
+  //printf("%d\n",enteteTOF(index,1));
 
 
-  //CreerFichierInitiale(F,index,"Noms.txt","Prenoms.txt","note0.txt","note1.txt","note2.txt","note3.txt","note4.txt","note5.txt");
-/*while(a<=enteteTOF(index,1)){
+ // CreerFichierInitiale(F,index,"Noms.txt","Prenoms.txt","note0.txt","note1.txt","note2.txt","note3.txt","note4.txt","note5.txt");
+  while(a<=enteteTOF(index,1)){
     liredirTOF(index,a,&buff);
     for(b=0;b<=buff.nb;b++)
     {
         printf("classe: %d bloc: %d deplacement: %d\n",buff.tab[b].classe,buff.tab[b].bloc,buff.tab[b].deplacement);
     }
     a++;
-  }*/
-  //insertion_eleve(F,index,"ABBBBB","mouaici",0,1,'m',enteteTOF(index,1));
+  }
+  //insertion_eleve("FICHIERETUDIANTS",index,"ABBBBB","mouaici",0,1,'m');
+
   printf("\n*****************************************************************************\n");
-   //afficher_fichier(F);
+   afficher_fichier(F);
   printf("\n*****************************************************************************\n");
 
   a=1;
- /* while(a<=enteteTOF(index,1)){
-    liredirTOF(index,a,&buff);
-    for(b=0;b<=buff.nb;b++)
-    {
-        printf("classe: %d bloc: %d deplacement: %d\n",buff.tab[b].classe,buff.tab[b].bloc,buff.tab[b].deplacement);
-    }
-    a++;
-  }*/
-   //afficher_fichier(F);
-  //printf("%d",entete(F,3));
+
    fermer(F);
    fermerTOF(index);
    return 0;
