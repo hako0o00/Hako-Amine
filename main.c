@@ -3,7 +3,7 @@
 #include <time.h>
 #include <string.h>
 #define Tail_bloc 100
-#define Max_tab 50
+#define Max_tab 20
 
 char AP0[5][20] = {"Arabe" , "Education Civique", "Education Islamique", "Math" ,"Science"};
 char AP1[5][20] = {"Arabe" , "Education Civique", "Education Islamique", "Math" ,"Science"};
@@ -299,8 +299,6 @@ void extr_Gprenom(char *nomfich,int i,char *prenom,char *genre){
      comt++;
     }
     fclose(f);
-
-
 }*/
 void generer_fichier_note(char *nomfich, int annee )
 {
@@ -338,6 +336,7 @@ void generer_fichier_note(char *nomfich, int annee )
 //***********************************************************************************
 void Gnr_eleve(char *eleve,int annee,char classe,int i,char *Noms,char *Prenoms,char *Notes)
 {
+  //srand(time(NULL));
   char ann[6]= {"P12345"};
   char inter[100];
   char ident[4];
@@ -354,7 +353,7 @@ void Gnr_eleve(char *eleve,int annee,char classe,int i,char *Noms,char *Prenoms,
     extr_nom(Noms,num_nom,nom);
     extr_nom(Notes,i,Snotes);
     sprintf(inter ,"%s%c%d%c%s,%s%s", ident, ann[annee], classe , genre, nom, prenom,Snotes);
-    if (annee < 3){
+   /* if (annee < 3){
         longg = strlen(inter) + 3;
     }
     else {
@@ -365,7 +364,8 @@ void Gnr_eleve(char *eleve,int annee,char classe,int i,char *Noms,char *Prenoms,
         else {
             longg = strlen(inter) + 3;
         }
-    }
+    }*/
+    longg=strlen(inter)+3;
     sprintf(eleve ,"%d0%s",longg,inter);
 
 }
@@ -416,17 +416,18 @@ int i=0;
 }
 //*******************************************************
 
-void insertion( TOVC *f, char * eleve,int bloc,int deplacement)
+void insertion( TOVC *f, char * eleve,int bloc,int deplacement,int bloc_final,int chmp_final)
 {
     int i,j,h;
-
-    char cle[Tail_bloc];
-    extrer_NomPrenom(eleve,cle);
     int taille=strlen(eleve);
+    char cle[Tail_bloc];
+
+    extrer_NomPrenom(eleve,cle);
     int k=0,m=0;
 
-    if(rechercher(f,cle,&i,&j,bloc,deplacement)==0)
+    if(rechercher(f,cle,&i,&j,bloc,deplacement,bloc_final,chmp_final)==0)
     {
+        //printf("\nla position d'insertion:------------i=%d-----------------j=%d--------",i,j);
         if(i>entete(f,1)) {aff_entete(f,1,entete(f,1)+1); aff_entete(f,3,0);}
         Buffer buff ;
         liredir(f,i,&buff);
@@ -455,7 +456,6 @@ void insertion( TOVC *f, char * eleve,int bloc,int deplacement)
                 eleve[m]=c;
                 m++;
                 j++;
-
            }
            else
            {
@@ -514,7 +514,7 @@ void extr_enr(TOVC *F,char *chaine,int block,int deplacement,int *longeur,int *s
        }
 
 //****************************************************************************
-int rechercher(TOVC *F,char *cle_recherche,int *block,int *champ, int i, int j)
+int rechercher(TOVC *F,char *cle_recherche,int *block,int *champ, int i, int j,int i_final,int j_final)
 {
     char chaine[Tail_bloc];
     char cle_extr[Tail_bloc];
@@ -522,17 +522,13 @@ int rechercher(TOVC *F,char *cle_recherche,int *block,int *champ, int i, int j)
 
     int length,sup,cmp,trouve=0,stop=0,ind_enrg=1;
     Buffer buff;
-    while((trouve==0)&&(stop==0)&&(ind_enrg<=entete(F,2)))
+    while((trouve==0)&&(stop==0)&&(ind_enrg<=entete(F,2))&&((i<i_final)||(j<j_final)))
     {
       extr_enr(F,chaine,i,j,&length,&sup);
      // extrer_cle(chaine,cle_extr);
      extrer_NomPrenom(chaine,cle_extr);
       cmp=strcmp(cle_recherche,cle_extr);
-      if(cmp==0 && sup==0)
-      {
-
-          trouve=1;
-      }
+      if(cmp==0 && sup==0){trouve=1;}
       else{
         if(cmp>0)
         {
@@ -555,6 +551,22 @@ int rechercher(TOVC *F,char *cle_recherche,int *block,int *champ, int i, int j)
 
 }
 //****************************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//*****************************************************************************************
 void supprimer_eleve(TOVC *f,char *eleve)
 {
     int i=1,j=49;
@@ -606,80 +618,20 @@ void afficher_fichier(TOVC *f)
         printf("| %s\n",buff.chaine);
         printf("------------------------------------------\n");
         i++;
-
     }
 
 }
-/*
- int CreerFichierInitiale(TOVC *F,char *NomFichier){
 
-  char fichier_noms[50],fichier_prenoms[50],fichier_noteP[50],fichier_note1[50],
-  fichier_note2[50],fichier_note3[50],fichier_note4[50],fichier_note5[50],eleve[50] = {0};
-  int i = 0 ,j = 1;
-
-
-  /*printf("Donner moi le nom du fichiers des noms : ");
-  scanf("%s",fichier_noms);
-  printf("Donner moi le nom du fichiers des Prenoms : ");
-  scanf("%s",fichier_prenoms);
-  printf("Donner moi le nom du fichiers des Notes des classes Preparatives : ");
-  scanf("%s",fichier_noteP);
-  printf("Donner moi le nom du fichiers des Notes des classes du 1er annee : ");
-  scanf("%s",fichier_note1);
-    printf("Donner moi le nom du fichiers des Notes des classes du 2eme annee : ");
-  scanf("%s",fichier_note2);
-    printf("Donner moi le nom du fichiers des Notes des classes du 3eme annee : ");
-  scanf("%s",fichier_note3);
-    printf("Donner moi le nom du fichiers des Notes des classes du 4eme annee : ");
-  scanf("%s",fichier_note4);
-    printf("Donner moi le nom du fichiers des Notes des classes du 5eme annee : ");
-  scanf("%s",fichier_note5);
-  for (i =1 ; i<=600; i++) {
-        switch(i/100){
-        case 0:
-           // afficher_fichier(F);
-
-            Gnr_eleve(eleve, 0, ((i/25) % 4) +1, (i % 100) +1 , "Noms.txt","Prenoms.txt","P.txt");
-            printf("i : %d , eleve : %s , annee : %d classe : %d , num_eleve : %d\n",i,eleve,i/100,((i/25) % 4 +1),(i % 100) +1);
-            break;
-        case 1:
-            //afficher_fichier(F);
-            Gnr_eleve(eleve, 1, ((i/25) % 4 )+1, (i % 100) +1 , "Noms.txt","Prenoms.txt","AP1.txt");
-            break;
-        case 2:
-           // afficher_fichier(F);
-            Gnr_eleve(eleve, 2, ((i/25) % 4) +1, (i % 100) +1 , "Noms.txt","Prenoms.txt","AP2.txt");
-            break;
-        case 3:
-            //afficher_fichier(F);
-            Gnr_eleve(eleve, 3, ((i/25) % 4) +1, (i % 100) +1 , "Noms.txt","Prenoms.txt","AP3.txt");
-            break;
-        case 4:
-           // afficher_fichier(F);
-            Gnr_eleve(eleve, 4, ((i/25) % 4) +1, (i % 100) +1 , "Noms.txt","Prenoms.txt","AP4.txt");
-            break;
-        case 5:
-           // afficher_fichier(F);
-            Gnr_eleve(eleve, 5, ((i/25) % 4) +1, (i % 100) +1 , "Noms.txt","Prenoms.txt","AP5.txt");
-            break;
-        }
-      insertion(F,eleve);
-      printf("l'insertion de l'eleve num %d\n",i);
-  }
-
-
- }*/
-
-  int CreerFichierInitiale(TOVC *F,char *NomFichier , char *FichierNoms , char *FichierPrenoms ,char *note0 ,char *note1 ,char *note2,char *note3,char *note4,char *note5 ){
+  int CreerFichierInitiale(TOVC *F,TOF *f , char *FichierNoms , char *FichierPrenoms ,char *note0 ,char *note1 ,char *note2,char *note3,char *note4,char *note5 ){
 
      int i,j,h,k;
      char eleve[70];
     // char *FichierNotes;
-     TOF *f;
-     f=ouvrirTOF(NomFichier,'n');
+     //TOF *f;
+     //f=ouvrir(NomFichier,'n');
      Buffer1 buf;
 
-     int block1,dep1,indice_tab_index=0,block0=1,dep0=0,blc=1,chmp=0,blocIndex=1,PosIndex=0;
+     int block1,dep1,block0=1,dep0=0,blc=1,chmp=0,blocIndex=1,PosIndex=0;
     // tab_index[0].bloc=1;
      //tab_index[0].deplacement=0;
      for(i=0;i<=5;i++)
@@ -714,14 +666,14 @@ void afficher_fichier(TOVC *f)
                 GenererAdrClasse(eleve,block0,dep0,&block1,&dep1);
                 block0=block1;
                 dep0=dep1;
-                insertion(F,eleve,blc,chmp);
+                insertion(F,eleve,blc,chmp,1000000000000,100000000000);
                 h++;
              }
-             if(PosIndex<=Max_tab-1)
+             if(PosIndex <= Max_tab-1)
              {
                 buf.tab[PosIndex].bloc=blc;
                 buf.tab[PosIndex].deplacement=chmp;
-                buf.tab[PosIndex].classe=i*10+j;
+                buf.tab[PosIndex].classe=(i*10)+j;
                 PosIndex++;
              }
              else{
@@ -731,7 +683,7 @@ void afficher_fichier(TOVC *f)
                 PosIndex=1;
                 buf.tab[0].bloc=blc;
                 buf.tab[0].deplacement=chmp;
-                buf.tab[0].classe=i*10+j;
+                buf.tab[0].classe=(i*10)+j;
 
              }
 
@@ -741,13 +693,14 @@ void afficher_fichier(TOVC *f)
              blc=block0;
              chmp=dep0;
 
-             indice_tab_index++;
+             //indice_tab_index++;
          }
      }
-     aff_enteteTOF(f,1,blocIndex);
+
      buf.nb=PosIndex-1;
      ecriredirTOF(f,blocIndex,buf);
-     fermerTOF(f);
+     aff_enteteTOF(f,1,blocIndex);
+     //fermerTOF (f);
   }
   //*************************************************************************************
   void recuperer_chaine(TOVC *f,char *chaine,int length,int block,int dep)
@@ -787,7 +740,6 @@ void afficher_fichier(TOVC *f)
     }
     *i=block;
     }
-
 }*/
 //********************************************************************
 void GenererAdrClasse(char *enreg,int bloc,int dep,int *i,int *j)
@@ -797,7 +749,7 @@ void GenererAdrClasse(char *enreg,int bloc,int dep,int *i,int *j)
     taille[0]=enreg[0];
     taille[1]=enreg[1];
     int taille_nb=atoi(taille),ind;
-   // printf("\n ....chaine=%s...................taille=%d",taille,taille_nb);
+
      blc = (blc*Tail_bloc + taille_nb + chmp) / Tail_bloc;
      chmp = (chmp + taille_nb ) % Tail_bloc ;
     *i=blc;
@@ -806,65 +758,174 @@ void GenererAdrClasse(char *enreg,int bloc,int dep,int *i,int *j)
 
 }
 //***********************************************************************
-int recherche_TOF(TOF *F,char *cle_recherche, int *bloc, int *deplacement)
+int recherche_TOF(TOF *F,int cle_recherche, int *bloc, int *deplacement)
 {
     int bi=1,bs=enteteTOF(F,1),trouve=0,stop=0;
+    int j=0,i;
+    Buffer1 buf;
+    while((bi<=bs)&&(trouve==0)&&(stop==0))
+    {
+        i=(bi+bs)/2;
+        liredirTOF(F,i,&buf);
+        if((cle_recherche >= buf.tab[0].classe)&&(cle_recherche<=buf.tab[buf.nb].classe))
+           {
+               int inf=0,sup = buf.nb;
+               while((inf <= sup)&&(trouve==0))
+               {
+                  j= ( inf + sup)/2;
+                  if(cle_recherche==buf.tab[j].classe) {trouve = 1 ;
+                  *deplacement=buf.tab[j].deplacement;
+                  *bloc=buf.tab[j].bloc;
+                  }
+                  else{
+                    if(cle_recherche<buf.tab[j].classe) {sup=j-1;}
+                    else{inf=j+1;}
+                  }
+               }
+               if (trouve==0) j=inf ;
+               stop=1;
+           }
+           else{
+            if(cle_recherche<buf.tab[0].classe) {bs=i-1;}
+            else bi=i+1;
+           }
 
+    }
+    //if(trouve==0) i=bi;
+    return trouve;
 
 }
-
-
-
 //***********************************************************************
-int rechercher_classe(Tovc *F, char *cle_rechercher , int *bloc,int *deplacement)
+void insertion_eleve(char *fichetudiant,TOF *index, char *nom,char *prenom,int annee,int classe,char genre)
 {
-   TOF *index;
+
+  srand(time(NULL));
+  TOVC *f;
+  f=ouvrir(fichetudiant,'a');
+  char ann[6]= {"P12345"};
+  char inter[100];
+  char ident[4];
+  char fichiernote[50];
+  char Snotes[20];
+  char eleve[Tail_bloc];
+  int longg;
+  longg = 0;
+  switch(annee){
+  case 0:
+    strcpy(fichiernote,"note0.txt");
+    break;
+  case 1:
+    strcpy(fichiernote,"note1.txt");
+    break;
+  case 2:
+    strcpy(fichiernote,"note2.txt");
+    break;
+  case 3:
+    strcpy(fichiernote,"note3.txt");
+    break;
+  case 4:
+    strcpy(fichiernote,"note4.txt");
+    break;
+  case 5:
+    strcpy(fichiernote,"note5.txt");
+    break;
+  }
+  NumtoS(rand()%9999,4,ident);
+    extr_nom(fichiernote,rand()%100,Snotes);
+    sprintf(inter ,"%s%c%d%c%s,%s%s", ident, ann[annee], classe , genre, nom, prenom,Snotes);
+    longg=strlen(inter)+3;
+    sprintf(eleve ,"%d0%s",longg,inter);
+    int i,j;
+    Buffer1 buf;
+    if(eleve[7]=='P'){
+      j=(classe-1)%Max_tab ;
+      i=((classe-1)/Max_tab)+1 ;
+    }
+    else {
+      j=(4*annee+classe-1)%Max_tab ;
+      i=((4*annee+classe-1)/Max_tab)+1;
+    }
+    int bloc,depl;
+    liredirTOF(index,i,&buf);
+    bloc=buf.tab[j].bloc;
+    depl=buf.tab[j].deplacement;
+    j++;
+    if(j>buf.nb)
+    {
+        i++;
+        liredirTOF(index,i,&buf);
+        j=0;
+    }
+    if((annee<5)||(classe<4)){insertion(f,eleve,bloc,depl,buf.tab[j].bloc,buf.tab[j].deplacement);}
+    else{insertion(f,eleve,bloc,depl,10000000000,100000000);}
+    fermer(f);
+    while(i<=enteteTOF(index,1))
+    {
+        while(j<=buf.nb)
+        {
+            buf.tab[j].deplacement = (buf.tab[j].deplacement) + longg;
+            if((buf.tab[j].deplacement)>=Tail_bloc)
+            {
+                buf.tab[j].deplacement= (buf.tab[j].deplacement)-Tail_bloc;
+                buf.tab[j].bloc=(buf.tab[j].bloc)+1;
+            }
+            j++;
+        }
+        ecriredirTOF(index,i,buf);
+        i++;
+        j=0;
+        if(i<=enteteTOF(index,1)){ liredirTOF(index,i,&buf);}
+    }
 
 }
-
 
 
 
 int main()
 {
-    //srand(time(NULL));
-    char chaine1[50] = {"3006502P1fRAHMOUNE,Meryem14524"};
+    srand(time(NULL));
+   /* char chaine1[50] = {"3006502P1fRAHMOUNE,Meryem14524"};
     char chaine2[50] = {"2600491P1fREZIG,Basma38652"};
     char chaine3[50] = {"3001479P1fBENYAMINA,Donya##195"};
     char chaine4[50] = {"3004466P1fBOUCHAREB,Dalia96636"};
     char chaine5[50] = {"3008717P1fBOUCHAREB,Leila82##5"};
     char chaine6[50] = {"2801539P1fBERKANI,Sofia75878"};
-    char chaine7[50] = {"28"};
+    char chaine7[50] = {"28"};*/
 
     char cle1[50];
     char cle2[50];
-
     int longeur,supp;
     TOVC *F;
-    TOF *f;
+    TOF *index;
+    int i,j,longg;
+  F = ouvrir("FICHIERETUDIANTS",'a');
+  index=ouvrirTOF("INDEXCLASSE",'a');
+  int b,a=1;
+  Buffer1 buff;
 
-   F = ouvrir("try1",'a');
-   f=ouvrirTOF("Fichierindex",'a');
-   Buffer1 buff;
-   liredirTOF(f,1,&buff);
-   int b;
+  //printf("%d\n",enteteTOF(index,1));
+
+
+ // CreerFichierInitiale(F,index,"Noms.txt","Prenoms.txt","note0.txt","note1.txt","note2.txt","note3.txt","note4.txt","note5.txt");
+  while(a<=enteteTOF(index,1)){
+    liredirTOF(index,a,&buff);
     for(b=0;b<=buff.nb;b++)
-   {
-       printf("classe %d : bloc: %d deplacement: %d\n",buff.tab[b].classe,buff.tab[b].bloc,buff.tab[b].deplacement);
-   }
-  printf("\n+++++++++++++++++++++++++++++++++++++++++++++++++++\n***************************************************************************\n");
-  // CreerFichierInitiale(F,"Fichierindex","Noms.txt","Prenoms.txt","note0.txt","note1.txt","note2.txt","note3.txt","note4.txt","note5.txt");
-  //CreerFichierInitiale(F,"try1");
+    {
+        printf("classe: %d bloc: %d deplacement: %d\n",buff.tab[b].classe,buff.tab[b].bloc,buff.tab[b].deplacement);
+    }
+    a++;
+  }
+  //insertion_eleve("FICHIERETUDIANTS",index,"ABBBBB","mouaici",0,1,'m');
+
+  printf("\n*****************************************************************************\n");
    afficher_fichier(F);
+  printf("\n*****************************************************************************\n");
 
-/*   int a;
-   for(a=0;a<=23;a++)
-   {
-       printf("classe %d : bloc: %d deplacement: %d\n",a,tab_index[a].bloc,tab_index[a].deplacement);
-   }*/
+  a=1;
 
-     //fermer(f);
-     fermer(F);
-     //return 0;
+   fermer(F);
+   fermerTOF(index);
+   return 0;
+
 
 }
