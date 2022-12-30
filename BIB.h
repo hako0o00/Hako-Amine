@@ -165,8 +165,6 @@ void insertion_index(char *eleve);
 
 void supprimer_eleve(TOVC *f,char *eleve);
 
-
-
 int CreerFichierInitiale(char *note0 ,char *note1 ,char *note2,char *note3,char *note4,char *note5 );
 
 void recuperer_chaine(TOVC *f,char *chaine,int length,int block,int dep);
