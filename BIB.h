@@ -2,6 +2,7 @@
 #define BIB_H_INCLUDED
 
 /**************************inclusions*******************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -92,6 +93,10 @@ char Genres[Nprenoms] = {0};
 
 int ident[600] = {0} ;
 
+int ident_index[600][3] = {0};
+
+int num_eleve = 0;
+
 int index_classe[25][2] = {0};
 
 
@@ -163,7 +168,7 @@ void afficher_fichier();
 
 void insertion_index(char *eleve);
 
-void supprimer_eleve(TOVC *f,char *eleve);
+int supprimer_eleve(char *eleve) ;
 
 int CreerFichierInitiale(char *note0 ,char *note1 ,char *note2,char *note3,char *note4,char *note5 );
 
@@ -173,5 +178,8 @@ int recherche_TOF(TOF *F,int cle_recherche, int *bloc, int *deplacement);
 
 void insertion_eleve(char *fichetudiant,TOF *index, char *nom,char *prenom,int annee,int classe,char genre);
 
+void insert_ident(int identt, int blockk , int champp ,int longeur);
+
+int rech_ident(int n, int key, int *i);
 
 #endif // BIB_H_INCLUDED

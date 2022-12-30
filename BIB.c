@@ -369,7 +369,7 @@ void Gnr_eleve(char *eleve,int annee,char classe,int i,char *Notes)
   char genre;
   int num_nom,num_prenom,longg;
   longg = 0;
-     NumtoS(ident[i],4,identifiant);
+     NumtoS(ident[100*annee + i],4,identifiant);
     num_prenom = rand()%Nprenoms;
     num_nom = rand()%Nnoms;
     extr_Snote(Notes,i,Snotes);
@@ -471,11 +471,20 @@ return trouve;
 {
     int i = i_init,j=j_init,h, taille=strlen(eleve), k=0,m=0;
     char cle[Tail_bloc];
-    int  classe  , annee ;
+    int  identifiant ;
+    char identt[4];
+
+    identt[0] = eleve[2];
+    identt[1] = eleve[3];
+    identt[2] = eleve[4];
+    identt[3] = eleve[5];
+    identt[4] = '\0';
+    identifiant = atoi(identt);
 
     extrer_cle(eleve,cle);
     if(rechercher(cle,&i,&j,i_init,j_init,bloc_final,chmp_final)==0)
     {
+        insert_ident(identifiant,i,j,taille);
         if(i>entete(Fichier_main,1)) {aff_entete(Fichier_main,1,entete(Fichier_main,1)+1); aff_entete(Fichier_main,3,0);}
         Buffer buff ;
 
@@ -548,6 +557,8 @@ void insertion_index(char *eleve){
     classe = (int)(eleve[7]) -48 ;
     if ( eleve[6] == 'P' ) {annee = 0;}
     else {annee = (int)(eleve[6])-48;}
+
+
     i_init = index_classe[annee*4 + classe -1][0] ;
     j_init = index_classe[annee*4 + classe -1][1] ;
     i_final = index_classe[annee*4 + classe][0] ;
@@ -571,6 +582,9 @@ int CreerFichierInitiale(char *note0 ,char *note1 ,char *note2,char *note3,char 
 
 int i,j,k,h;
 char eleve[Tail_bloc];
+
+generer_tab_identifiants();
+
      for(i=0;i<=0;i++)
      {
          h=1;
@@ -600,8 +614,8 @@ char eleve[Tail_bloc];
                               Gnr_eleve(eleve,i,j,h,note5);
                               break;
                       }
-                      printf("insertions success de : %d\n",k);
-               insertion_index(eleve);
+                //printf("insertions success de : %d\n",k);
+                insertion_index(eleve);
                 h++;
              }
 
@@ -612,3 +626,134 @@ char eleve[Tail_bloc];
 }
 
 /*******************************************************************************************/
+
+
+/*********************************************************************************/
+
+int rech_ident(int n, int key, int *i)
+{
+
+    int left = 0;
+    int right = n - 1;
+
+    // Binary search loop
+    while (left <= right)
+    {
+        // Calculate the middle element
+        int middle = (left + right) / 2;
+
+        // Compare the key to the value in the middle element
+        if (ident_index[middle][0] < key)
+            left = middle + 1;
+        else if (ident_index[middle][0] > key)
+            right = middle - 1;
+        else
+            {*i = middle;
+            return 1;} // Key found
+    }
+
+    // Key not found
+    *i = left;
+    return 0;
+}
+
+// The insert function
+
+/**********************************************************************************/
+
+void insert_ident( int identt, int blockk , int champp ,int longeurr)
+{
+
+    int i = 0;
+    rech_ident(num_eleve,identt,&i);
+
+    for (int j = num_eleve - 1; j >= i; j--){
+        ident_index[j + 1][0] = ident_index[j][0];
+        ident_index[j + 1][1] = ident_index[j][1];
+        ident_index[j + 1][2] = ident_index[j][2];}
+
+    for (int j = 0 ; j< num_eleve+1 ;j++){
+        int blc =  ident_index[j][1];
+        int chmp = ident_index[j][2];
+        if (blockk < blc || (blockk == blc && champp <= chmp)) {
+                     ident_index[j][1] = ident_index[j][1] + ((longeurr + ident_index[j][2]) / Tail_bloc);
+       ident_index[j][2] = (ident_index[j][2] + longeurr) % Tail_bloc ;
+        }
+    }
+
+    ident_index[i][0] = identt;
+    ident_index[i][1] = blockk;
+    ident_index[i][2] = champp;
+    num_eleve++;
+}
+
+/****************************************************************************************************/
+
+
+
+
+/*****************************************************************************************************/
+int supprimer_eleve(char *eleve) {
+int index,i,j,i1,j1,longeur = strlen(eleve);
+Buffer buf1,buf2;
+
+ if (rech_ident(num_eleve,ident,&index) == 0) {return 0;}
+
+ // recuperation du bloc et champ de l'enregistrement a supprimer
+ i=ident_index[index][1];
+ j=ident_index[index][2];
+ printf("\nle i est : %d   le j est : %d ",i,j);
+
+// calcule du bloc est champ ou en va decaler du
+ i1 = i + (j + longeur)/Tail_bloc;
+ j1 = (j + longeur) % Tail_bloc ;
+ printf("\nle i1 est : %d   le j1 est : %d ",i1,j1);
+
+  //supression phisique
+ while(i1<index_classe[24][1] || (i1 == index_classe[24][1] && j1<index_classe[24][2])){
+
+   if (j == 0) liredir(Fichier_main,i,&buf1);
+   if (j1 == 0) liredir(Fichier_main,i1,&buf2);
+
+   buf1.chaine[j] = buf2.chaine[j1] ;
+   j1++;
+   j++;
+
+    if (j== Tail_bloc-1){
+            ecriredir(Fichier_main,i,buf1);
+            j =0;
+            i++;
+        }
+    if (j1 == Tail_bloc-1){
+            j1 =0;
+            i1++;
+        }
+ }
+
+ //eliminer la fin
+ liredir(Fichier_main,i,&buf1);
+ while(i < i1  || (i == i1 && j < j1)){
+        if (j == 0) liredir(Fichier_main,i,&buf1);
+        buf1.chaine[j] = '\0';
+        j++;
+        if (j== Tail_bloc-1){
+            ecriredir(Fichier_main,i,buf1);
+            j =0;
+            i++;
+        }
+
+ }
+
+
+return 1;
+
+}
+
+
+
+
+
+
+
+
+
