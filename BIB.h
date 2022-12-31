@@ -99,6 +99,9 @@ int num_eleve = 0;
 
 int index_classe[25][2] = {0};
 
+int moy_ac[] = {0};
+char GNP[][50] = {0};
+
 
 
 /***********************machine_abstraite***************************/
@@ -168,7 +171,7 @@ void afficher_fichier();
 
 void insertion_index(char *eleve);
 
-int supprimer_eleve(char *eleve) ;
+int supprimer_eleve(int identif) ;
 
 int CreerFichierInitiale(char *note0 ,char *note1 ,char *note2,char *note3,char *note4,char *note5 );
 

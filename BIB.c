@@ -614,7 +614,7 @@ generer_tab_identifiants();
                               Gnr_eleve(eleve,i,j,h,note5);
                               break;
                       }
-                //printf("insertions success de : %d\n",k);
+                printf("insertions success de : %d\n",k);
                 insertion_index(eleve);
                 h++;
              }
@@ -686,74 +686,180 @@ void insert_ident( int identt, int blockk , int champp ,int longeurr)
     ident_index[i][2] = champp;
     num_eleve++;
 }
+/***************************************************************************************/
+void supp_ident( int identt,int longeurr)
+{
+
+    int i = 0;
+    rech_ident(num_eleve,identt,&i);
+    int blockk = ident_index[i][1];
+    int champp = ident_index[i][2];
+
+    for (int j = i; j <= num_eleve; j++){
+        ident_index[j][0] = ident_index[j+1][0];
+        ident_index[j][1] = ident_index[j+1][1];
+        ident_index[j][2] = ident_index[j+1][2];}
+
+    for (int j = 0 ; j< num_eleve ;j++){
+        int blc =  ident_index[j][1];
+        int chmp = ident_index[j][2];
+        if (blockk < blc || (blockk == blc && champp <= chmp)) {
+                   if (longeurr % Tail_bloc == ident_index[j][2] || longeurr < ident_index[j][2])  {ident_index[j][1] - abs(((longeurr - ident_index[j][2]) / Tail_bloc)); }
+                   else {ident_index[j][1] = ident_index[j][1] - (abs(((longeurr - ident_index[j][2]) / Tail_bloc) +1));}
+                   ident_index[j][2] =  (50 - (( longeurr - ident_index[j][2]) % Tail_bloc)) % Tail_bloc ;
+        }
+    }
+
+    ident_index[num_eleve][0] = '\0';
+    ident_index[num_eleve][1] =  '\0';
+    ident_index[num_eleve][2] = '\0';
+    num_eleve--;
+}
 
 /****************************************************************************************************/
 
+void extrer_GNomPrenom(char *chaine,char *cle)
+{
+    int i =9;
+    int j=0;
+    while ((chaine[i] != '0')&& (chaine[i] != '1')&& (chaine[i] != '2')&& (chaine[i] != '3')&& (chaine[i] != '4')&& (chaine[i] != '5')&& (chaine[i] != '6')&& (chaine[i] != '7')&& (chaine[i] != '8')&& (chaine[i] != '9')&& (chaine[i] != '@') )
+    {
+       if( chaine[i] != ',' )
+       {
+          cle[j]=chaine[i];
+          j++;
 
+       }
 
+       i++;
+    }
+}
 
 /*****************************************************************************************************/
-int supprimer_eleve(char *eleve) {
-int index,i,j,i1,j1,longeur = strlen(eleve);
+int supprimer_eleve(int identif) {
+int i = 0,i1,j1,i2,j2,longeur ;
+char eleve[50];
+
+rech_ident(num_eleve,identif,&i);
+extr_enr(eleve,ident_index[i][1],ident_index[i][2],&longeur);
 Buffer buf1,buf2;
 
- if (rech_ident(num_eleve,ident,&index) == 0) {return 0;}
+
 
  // recuperation du bloc et champ de l'enregistrement a supprimer
- i=ident_index[index][1];
- j=ident_index[index][2];
- printf("\nle i est : %d   le j est : %d ",i,j);
+
+ i1= ident_index[i][1];
+ j1= ident_index[i][2];
 
 // calcule du bloc est champ ou en va decaler du
- i1 = i + (j + longeur)/Tail_bloc;
- j1 = (j + longeur) % Tail_bloc ;
- printf("\nle i1 est : %d   le j1 est : %d ",i1,j1);
+ i2 = i1 + (j1 + longeur)/Tail_bloc;
+ j2 = (j1 + longeur) % Tail_bloc ;
 
+liredir(Fichier_main,i1,&buf1);
+liredir(Fichier_main,i2,&buf2);
   //supression phisique
- while(i1<index_classe[24][1] || (i1 == index_classe[24][1] && j1<index_classe[24][2])){
+ while(i2 < index_classe[24][0] || (i2 == index_classe[24][0] && j2 < index_classe[24][1])){
 
-   if (j == 0) liredir(Fichier_main,i,&buf1);
-   if (j1 == 0) liredir(Fichier_main,i1,&buf2);
 
-   buf1.chaine[j] = buf2.chaine[j1] ;
+   if (j2 == 0) liredir(Fichier_main,i2,&buf2);
+buf1.chaine[j1] = buf2.chaine[j2] ;
+   j2++;
    j1++;
-   j++;
 
-    if (j== Tail_bloc-1){
-            ecriredir(Fichier_main,i,buf1);
-            j =0;
-            i++;
+    if (j2 == Tail_bloc){
+            j2=0;
+            i2++;
         }
-    if (j1 == Tail_bloc-1){
-            j1 =0;
+        if (j1 == Tail_bloc ){
+            ecriredir(Fichier_main,i1,buf1);
+            j1=0;
             i1++;
+            liredir(Fichier_main,i1,&buf1);
         }
+    if((i2 == index_classe[24][0] && j2 == index_classe[24][1])){
+      ecriredir(Fichier_main,i1,buf1);
+    }
  }
 
  //eliminer la fin
- liredir(Fichier_main,i,&buf1);
- while(i < i1  || (i == i1 && j < j1)){
-        if (j == 0) liredir(Fichier_main,i,&buf1);
-        buf1.chaine[j] = '\0';
-        j++;
-        if (j== Tail_bloc-1){
-            ecriredir(Fichier_main,i,buf1);
-            j =0;
-            i++;
+ liredir(Fichier_main,i1,&buf1);
+while(i1 < i2  || (i1 == i2 && j1 < j2)){
+        printf("\nkhra");
+        if (j1 == 0) liredir(Fichier_main,i1,&buf1);
+        buf1.chaine[j1] = '\0';
+        j1++;
+        if (j1 == Tail_bloc || (i1 == i2 && j1 == j2-1)){
+            ecriredir(Fichier_main,i1,buf1);
+            j1 =0;
+            i1++;
         }
 
  }
+  int classe , annee;
+    int i_init , j_init,i_final, j_final;
 
 
+    classe = (int)(eleve[7]) -48 ;
+    if ( eleve[6] == 'P' ) {annee = 0;}
+    else {annee = (int)(eleve[6])-48;}
+
+
+    i_init = index_classe[annee*4 + classe -1][0] ;
+    j_init = index_classe[annee*4 + classe -1][1] ;
+    i_final = index_classe[annee*4 + classe][0] ;
+    j_final = index_classe[annee*4 + classe][1] ;
+
+    insertion(eleve,i_init,j_init,i_final,j_final);
+
+    // mise a jour index
+    for( int i = annee*4 + classe ; i<25 ; i++ ){
+        if (longeur % Tail_bloc == index_classe[i][1] || longeur < index_classe[i][1])  {index_classe[i][0] - abs(((longeur - index_classe[i][1]) / Tail_bloc)); }
+        else {index_classe[i][0] = index_classe[i][0] - (abs(((longeur - index_classe[i][1]) / Tail_bloc) +1));}
+        index_classe[i][1] =  (50 - (( longeur - index_classe[i][1]) % Tail_bloc)) % Tail_bloc ;
+
+    }
+
+
+supp_ident(identif,longeur);
 return 1;
+
+}
+
+/**********************************************************************************/
+
+int maj(int identifiant,char *N_eleve){
+supprimer_eleve(identifiant);
+insertion_index(N_eleve);
+}
+
+/***********************************************************************************/
+void creer_eleve(char *eleve,int identif,int annee,char classe,char GNP,int i,char *Notes){
+  char ann[6]= {"P12345"};
+  char inter[100];
+  char identifiant[4];
+  char Snotes[20];
+  int num_nom,num_prenom,longg;
+  longg = 0;
+     NumtoS(identif,4,identifiant);
+    extr_Snote(Notes,i,Snotes);
+    sprintf(inter ,"%s%c%d%s", identifiant, ann[annee],classe ,GNP,Snotes);
+       longg=strlen(inter)+2;
+    sprintf(eleve ,"%d%s",longg,inter);
+}
+/***********************************************************************************/
+
+void prochaine_annee(char *annee){
+
+fermer(Fichier_main);
+
+Fichier_main = ouvrir(annee, 'N');
+
+for ( int i =0 ; i< num_eleve ;i++){
 
 }
 
 
 
-
-
-
-
+}
 
 
